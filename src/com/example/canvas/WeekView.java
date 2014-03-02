@@ -21,15 +21,15 @@ import android.view.View;
 import android.util.Log;
 import android.view.InputEvent;
 
-public class CustomView extends View {
+public class WeekView extends View {
 
 	private Paint circlePaint;
 	private Paint textPaint;
-	private JSONArray usersArray;
+	private JSONArray blocksArray;
 	private Float scale;
 	private Typeface customFont;
 	
-	public CustomView(Context context, AttributeSet attrs){
+	public WeekView(Context context, AttributeSet attrs){
 		
 		super(context, attrs);
 		circlePaint = new Paint();
@@ -52,10 +52,12 @@ public class CustomView extends View {
 		try {
 			
 			JSONObject jsonObject = new JSONObject(data); 
-			usersArray = jsonObject.getJSONArray("users");
 			
-			String sLength = String.valueOf(usersArray.length());
+			blocksArray = jsonObject.getJSONArray("blocks");
+			
+			String sLength = String.valueOf(blocksArray.length());
 			Log.d("Events",sLength);
+			
 			
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
@@ -67,63 +69,70 @@ public class CustomView extends View {
 	@Override
 	public void onDraw(Canvas canvas) {
 		
-		Log.d("Events","on draw executed");
-		
-		if(usersArray != null){
+		if(blocksArray != null){
 			
-			for (int i=0; i < usersArray.length(); i++)
+			textPaint.setTextSize((int) (20 * scale));
+			textPaint.setColor(Color.WHITE);
+			
+			circlePaint.setColor(Color.WHITE);
+			circlePaint.setStrokeWidth(3);
+	        canvas.drawRect(0, 0, 277, 286, circlePaint);
+	        
+	        double widthPerMinute = 0.38;
+			
+			for (int i=0; i < blocksArray.length(); i++)
 			{
-			    try {
-			    	
-			    	if(i == 0){
-			    		circlePaint.setColor(Color.MAGENTA);
-			    	} else {
-			    		circlePaint.setColor(Color.GREEN);
-			    	}
-			    	
-			        JSONObject oneObject = usersArray.getJSONObject(i);
-			        // Pulling items from the array
-			        String name = oneObject.getString("name");
-			        Log.d("Events",name);
-			        
-			        int viewWidthHalf = this.getMeasuredWidth()/2;
-					int viewHeightHalf = this.getMeasuredHeight()/2;
+		    	
+				try {
 					
-					int yMargin = i*60;
-					Log.d("Events",String.valueOf(yMargin));
-					
-					int radius = 0;
-					if(viewWidthHalf>viewHeightHalf)
-						radius=viewHeightHalf-10;
-					else
-						radius=viewWidthHalf-10;
+					int yPos1 = (i * 40) + 3;
+					int yPos2 = ((i+1) * 40) + 3;
+					int yPos3 = (i * 40) + 30;
+					int color = 0;
+					String person = "male";
 
-					//draw the circle using the properties defined
-					//canvas.drawCircle(viewWidthHalf, viewHeightHalf, radius, circlePaint);
+				    JSONArray dayArray = blocksArray.getJSONArray(i);
+				    
+				    int begin = 3;
+				    int end = 0;
+				    
+					for (int j=0; j < dayArray.length(); j++)
+					{
+						JSONObject block = dayArray.getJSONObject(j);
+						int minutes = Integer.parseInt(block.getString("minutes"));
+						person = block.getString("person").toString();
+									
+						if(person.equalsIgnoreCase("male")){
+							circlePaint.setColor(Color.argb(100, 123, 183, 233));
+						} else if(person.equalsIgnoreCase("female")){
+							circlePaint.setColor(Color.argb(100, 171, 123, 233));
+						}
+						
+						Log.d("Events",person);
+						
+						end = (int) (minutes * widthPerMinute);
+						
+					    canvas.drawRect(begin, yPos1, end, yPos2, circlePaint);
+					    canvas.drawText(person, 9, yPos3, textPaint);
+						
+					    begin = end;
+					    
+					}
 					
-					//circlePaint.setColor(Color.WHITE);
-					//circlePaint.setTextAlign(Paint.Align.CENTER);
-					//circlePaint.setTextSize(50);
-					//circlePaint.setStyle(Paint.Style.FILL);
 					
-					//canvas.drawRect(277, yMargin, 0, 0, circlePaint);
-					
-					//circlePaint.setStyle(Paint.Style.STROKE);
-				    //circlePaint.setColor(Color.BLACK);
-					
-					//draw the text using the string attribute and chosen properties
-					//canvas.drawText("HELP", viewWidthHalf, viewHeightHalf, circlePaint);
-					//canvas.drawRect(277, yMargin, 0, 0, circlePaint);
+				} catch (JSONException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
 			        
-			    } catch (JSONException e) {
-			        // Oops
-			    }
+			   
 			}
 			
 			// 7 * 40 = 280 + (2 * 3 = 6) = 286
 			
 			//textPaint.setTypeface(customFont);
-			textPaint.setTextSize((int) (20 * scale));
+			/*textPaint.setTextSize((int) (20 * scale));
 			textPaint.setColor(Color.WHITE);
 			
 			circlePaint.setColor(Color.WHITE);
@@ -174,7 +183,7 @@ public class CustomView extends View {
 	        // Monday
 	        circlePaint.setColor(Color.argb(100, 123, 183, 233));
 	        canvas.drawRect(3, 3, 274, 43, circlePaint);
-	        canvas.drawText("MON", 9, 30, textPaint);
+	        canvas.drawText("MON", 9, 30, textPaint);*/
 	        
 	        //textPaint.setColor(Color.BLACK);
 	        //canvas.drawText("WEEK 52 (24-12 - 01-01)", 0, 20, textPaint);
@@ -195,7 +204,7 @@ public class CustomView extends View {
         float yPosition = event.getY();
         
         String sPosition = String.valueOf(xPosition);;
-        Log.d("Events",sPosition);
+        //Log.d("Events",sPosition);
         
         return true;
         

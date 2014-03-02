@@ -42,15 +42,24 @@ public class AccountActivity extends Activity {
 	
 	protected AccountManager am;
     protected Intent intent;
+    private WeekView weekView;
+    private String blocks;
+    
     String TAG = "TGtracker";
     Activity activity;
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        am = AccountManager.get(getApplicationContext());       
+        
+    	super.onCreate(savedInstanceState);
+        
+    	am = AccountManager.get(getApplicationContext());       
         activity = this;
+        
+        setContentView(R.layout.activity_account);
+		weekView = (WeekView)findViewById(R.id.chart);
+        
     }
     
     private class TokenTask extends AsyncTask<String,Void,String> {
@@ -58,7 +67,6 @@ public class AccountActivity extends Activity {
 		@Override
 	    protected String doInBackground(String... url) {
 	      
-			String response = "";
 			String authToken = "null";
 			
 			String currentEvents = "";
@@ -66,26 +74,22 @@ public class AccountActivity extends Activity {
 			String nextEvents = "";
 			
 			authToken = updateToken(am,true);
-			
-			Log.d("Events", "got token, yipee: "+authToken);
-			
-			//String events = getEvents(authToken);
-			//String post = postEvents(events);
+
+			// get the begin and end dates of this week
 			List weekBeginEndDates = getWeekBeginEndDates();
 			
 			for (int i = 0; i < weekBeginEndDates.size(); i++) {
 				
 				List current = (List) weekBeginEndDates.get(i);
 				
+				// strip the begin date
 				String beginDate = current.get(0).toString();
-				String endDate = current.get(1).toString();
 				
-				Log.d("Events","begin date: "+beginDate);
-				Log.d("Events","end date: "+endDate);
+				// strip the end date
+				String endDate = current.get(1).toString();	
 				
+				// get the events from google calendar
 				String events = getEvents(authToken,beginDate,endDate);
-				
-				String week = "";
 				
 				if(i == 0){
 					currentEvents = events;
@@ -97,11 +101,9 @@ public class AccountActivity extends Activity {
 				
 			}
 			
-			postEvents(currentEvents,previousEvents,nextEvents);
+			getBlocks(currentEvents,previousEvents,nextEvents);
 			
-			Log.d("Events","after iterator");
-			
-			return response;
+			return null;
 	      
 	    }
 		
@@ -117,7 +119,6 @@ public class AccountActivity extends Activity {
 			accountManagerFuture = am.getAuthToken(accounts[0], scopes, null, activity, null, null);
 				
 			String sAccountManagerFuture = String.valueOf(accountManagerFuture);
-			Log.d("Events",sAccountManagerFuture);
 				
 			Bundle authTokenBundle = null;
 			try {
@@ -134,7 +135,6 @@ public class AccountActivity extends Activity {
 			}
 				
 			authToken = authTokenBundle.getString(AccountManager.KEY_AUTHTOKEN).toString();
-		    Log.d("Events", "newToken preinvalidate: "+authToken);
 			
 		    if(invalidateToken) {
                 am.invalidateAuthToken("com.google", authToken);
@@ -144,11 +144,6 @@ public class AccountActivity extends Activity {
 			return authToken;
 			
 		}
-
-	    @Override
-	    protected void onPostExecute(String result) {
-	    	
-	    }
 	    
 	    private String getEvents(String authToken, String beginDate, String endDate){
 	    	
@@ -161,7 +156,7 @@ public class AccountActivity extends Activity {
 				final String encodedBeginDate = URLEncoder.encode(beginDate, "UTF-8");
 				final String encodedEndDate = URLEncoder.encode(endDate, "UTF-8");
 				uri = new URL("https://www.googleapis.com/calendar/v3/calendars/"+calendarId+"/events?timeMax="+encodedEndDate+"&timeMin="+encodedBeginDate+"&orderBy=startTime&singleEvents=true");
-				Log.d("Events",uri.toString());
+				//Log.d("Events",uri.toString());
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -189,7 +184,7 @@ public class AccountActivity extends Activity {
 			}
 			
 			String sServerCode = String.valueOf(serverCode);
-			Log.d("Events",sServerCode);
+			//Log.d("Events",sServerCode);
 			
 		    //successful query
 		    if (serverCode == 200) {
@@ -197,7 +192,7 @@ public class AccountActivity extends Activity {
 				try {
 					
 					is = con.getInputStream();
-					Log.d("Events","input stream available");
+					//Log.d("Events","input stream available");
 					
 					BufferedReader r = new BufferedReader(new InputStreamReader(is));
 					StringBuilder total = new StringBuilder();
@@ -208,7 +203,7 @@ public class AccountActivity extends Activity {
 					
 					events = total.toString();
 					
-					Log.d("Events",total.toString());
+					//Log.d("Events",total.toString());
 					
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -226,9 +221,14 @@ public class AccountActivity extends Activity {
 	    	
 	    }
 	    
-	    private String postEvents(String currentEvents, String previousEvents, String nextEvents){
-
-	    	//Log.d("Events",previousEvents);
+	    /**
+	     * send the current, previous and next events to the new family sever, which makes blocks out of the events
+	     * @param currentEvents
+	     * @param previousEvents
+	     * @param nextEvents
+	     * @return
+	     */
+	    private Void getBlocks(String currentEvents, String previousEvents, String nextEvents){
 	    	
 	    	HttpClient httpclient = new DefaultHttpClient();
 	    	
@@ -237,33 +237,32 @@ public class AccountActivity extends Activity {
 	    	try {
 	    	
 	    		// create a list to store HTTP variables and their values
-	    	List nameValuePairs = new ArrayList();
-	    	
-	    	// add an HTTP variable and value pair
-	    	nameValuePairs.add(new BasicNameValuePair("current", currentEvents));
-	    	nameValuePairs.add(new BasicNameValuePair("previous", previousEvents));
-	    	nameValuePairs.add(new BasicNameValuePair("next", nextEvents));
-	    	
-	    	httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-	    	
-	    	// send the variable and value, in other words post, to the URL
-	    	HttpResponse response = httpclient.execute(httppost);
-	    	
-	    	InputStream content = response.getEntity().getContent();
-
-			BufferedReader buffer = new BufferedReader(new InputStreamReader(content));
-			StringBuilder sb = new StringBuilder();
-			
-			String line = null;
-			
-			while ((line = buffer.readLine()) != null)
-		    {
-		        sb.append(line);
-		    }
-			
-			String output = sb.toString();
-	    	
-			Log.d("Events",output);
+		    	List nameValuePairs = new ArrayList();
+		    	
+		    	// add an HTTP variable and value pair
+		    	nameValuePairs.add(new BasicNameValuePair("current", currentEvents));
+		    	nameValuePairs.add(new BasicNameValuePair("previous", previousEvents));
+		    	nameValuePairs.add(new BasicNameValuePair("next", nextEvents));
+		    	
+		    	httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+		    	
+		    	// send the variable and value, in other words post, to the URL
+		    	HttpResponse response = httpclient.execute(httppost);
+		    	
+		    	InputStream content = response.getEntity().getContent();
+	
+				BufferedReader buffer = new BufferedReader(new InputStreamReader(content));
+				StringBuilder sb = new StringBuilder();
+				
+				String line = null;
+				
+				while ((line = buffer.readLine()) != null)
+			    {
+			        sb.append(line);
+			    }
+				
+				// grab the output, and put in a string
+				blocks = sb.toString();
 			
 	    	} catch (ClientProtocolException e) {
 	    	// process execption
@@ -271,7 +270,7 @@ public class AccountActivity extends Activity {
 	    	// process execption
 	    	}
 	    	
-	    	return "";
+			return null;
 	    	
 	    }
 	    
@@ -319,7 +318,6 @@ public class AccountActivity extends Activity {
 	    private List getWeekBeginEndDate(int week){
 	    	
 	    	String sWeek = String.valueOf(week);
-	    	Log.d("Events",sWeek);
 	    	
 	    	int year = 2014;
 	    	List weekBeginEndDate = new ArrayList();
@@ -341,6 +339,13 @@ public class AccountActivity extends Activity {
 	    	return weekBeginEndDate;
 	    	
 	    	
+	    }
+	    
+	    @Override
+	    protected void onPostExecute(String result) {
+	    	Log.d("Events","post execute");
+	    	weekView.setData(blocks);
+	    	weekView.invalidate();
 	    }
 	    
     }
