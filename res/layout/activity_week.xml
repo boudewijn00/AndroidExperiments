@@ -9,35 +9,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".WeekActivity" >
     
-    <Button
-        android:id="@+id/btn1"
-        android:layout_width="50dp"
-        android:layout_height="wrap_content"
-        android:text="@string/previous"
-        android:layout_alignParentTop="true"
-		android:layout_alignParentLeft="true"
-		android:layout_alignLeft="@+id/chart" />
-    
-    <TextView 
-        android:layout_width="wrap_content"
-    	android:layout_height="wrap_content" 
-    	android:textSize="20dp"
-    	android:layout_marginTop="10dp"
-    	android:layout_alignParentTop="true"
-		android:layout_centerHorizontal="true" 
-    	android:layout_centerVertical="true"
-    	android:id="@+id/weekDates" >
-	</TextView>
-    
-    <Button
-        android:id="@+id/btn2"
-        android:layout_width="50dp"
-        android:layout_height="wrap_content"
-        android:text="@string/next"
-        android:layout_alignParentTop="true"
-		android:layout_alignParentRight="true" 
-		android:layout_alignRight="@+id/chart" />
-    
     <com.example.canvas.CustomView
             android:id="@+id/chart"
         	android:layout_width="fill_parent"

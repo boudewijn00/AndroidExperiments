@@ -20,6 +20,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.util.Log;
 import android.view.InputEvent;
+import android.widget.Toast;
 
 public class WeekView extends View {
 
@@ -28,6 +29,7 @@ public class WeekView extends View {
 	private JSONArray blocksArray;
 	private Float scale;
 	private Typeface customFont;
+	private Context context;
 	
 	public WeekView(Context context, AttributeSet attrs){
 		
@@ -41,13 +43,16 @@ public class WeekView extends View {
 		scale = resources.getDisplayMetrics().density;
 		
 		String sScale = String.valueOf(scale);
-		Log.d("Events","scale: "+sScale);
+		//Log.d("Events","scale: "+sScale);
+		
+		Toast toast = Toast.makeText(context,"test",Toast.LENGTH_LONG);
+		toast.show();
 		
 	}
 	
 	public void setData(String data){
 		
-		Log.d("Events", data);
+		//Log.d("Events", data);
 		
 		try {
 			
@@ -56,7 +61,7 @@ public class WeekView extends View {
 			blocksArray = jsonObject.getJSONArray("blocks");
 			
 			String sLength = String.valueOf(blocksArray.length());
-			Log.d("Events",sLength);
+			//Log.d("Events",sLength);
 			
 			
 		} catch (JSONException e) {
@@ -89,7 +94,9 @@ public class WeekView extends View {
 					int yPos2 = ((i+1) * 40) + 3;
 					int yPos3 = (i * 40) + 30;
 					int color = 0;
+					
 					String person = "male";
+					String type = "care";
 
 				    JSONArray dayArray = blocksArray.getJSONArray(i);
 				    
@@ -100,20 +107,35 @@ public class WeekView extends View {
 					{
 						JSONObject block = dayArray.getJSONObject(j);
 						int minutes = Integer.parseInt(block.getString("minutes"));
+						
 						person = block.getString("person").toString();
-									
-						if(person.equalsIgnoreCase("male")){
-							circlePaint.setColor(Color.argb(100, 123, 183, 233));
-						} else if(person.equalsIgnoreCase("female")){
-							circlePaint.setColor(Color.argb(100, 171, 123, 233));
+						type = block.getString("type").toString();
+						
+						end = (int) (minutes * widthPerMinute) + begin;
+						
+						if(type.equalsIgnoreCase("care")){
+							
+							if(person.equalsIgnoreCase("male")){
+								circlePaint.setColor(Color.argb(100, 123, 183, 233));
+							} else if(person.equalsIgnoreCase("female")){
+								circlePaint.setColor(Color.argb(100, 171, 123, 233));
+							}
+							
+						} else {
+							
+							circlePaint.setColor(Color.GRAY);
+							end += 1;
+							
 						}
 						
-						Log.d("Events",person);
+						String sEnd = String.valueOf(end);
+						String sBegin = String.valueOf(begin);
+						String sMinutes = String.valueOf(minutes);
 						
-						end = (int) (minutes * widthPerMinute);
+						//Log.d("Events","block: "+sBegin+" "+sEnd+" "+sMinutes);
 						
 					    canvas.drawRect(begin, yPos1, end, yPos2, circlePaint);
-					    canvas.drawText(person, 9, yPos3, textPaint);
+					    //canvas.drawText(person, 9, yPos3, textPaint);
 						
 					    begin = end;
 					    
@@ -185,8 +207,8 @@ public class WeekView extends View {
 	        canvas.drawRect(3, 3, 274, 43, circlePaint);
 	        canvas.drawText("MON", 9, 30, textPaint);*/
 	        
-	        //textPaint.setColor(Color.BLACK);
-	        //canvas.drawText("WEEK 52 (24-12 - 01-01)", 0, 20, textPaint);
+	        textPaint.setColor(Color.BLACK);
+	        canvas.drawText("WEEK 52 (24-12 - 01-01)", 0, 20, textPaint);
 			
 		}
 		

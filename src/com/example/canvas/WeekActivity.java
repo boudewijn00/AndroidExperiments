@@ -77,8 +77,8 @@ public class WeekActivity extends Activity {
 	    protected void onPostExecute(String result) {
 	    	myView.setData(result);
 	    	myView.invalidate();
-	    	final TextView textViewToChange = (TextView) findViewById(R.id.weekDates);
-			textViewToChange.setText("test");
+	    	//final TextView textViewToChange = (TextView) findViewById(R.id.weekDates);
+			//textViewToChange.setText("test");
 	    }
 	    
 	  }
