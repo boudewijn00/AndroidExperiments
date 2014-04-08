@@ -21,10 +21,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".WeekActivity"
-                  android:label="WeekActivity">
+        <activity android:name=".ReceiveActivity"
+                  android:label="ReceiveActivity">
             <intent-filter>
-                <action android:name="com.example.canvas.WeekActivity" />
+                <action android:name="com.example.canvas.ReceiveActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

@@ -1,11 +1,15 @@
 package com.example.canvas;
 
 import java.io.*;
+import java.util.ArrayList;
 
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 import android.app.Activity;
 import android.content.Context;
@@ -22,69 +26,51 @@ public class MainActivity extends Activity {
 	
 	private MediaPlayer mPlayer = null;
 	
+	private ListView listView;
+	private ArrayList< String>arrayList; // list of the strings that should appear in ListView
+	private ArrayAdapter arrayAdapter; // a middle man to bind ListView and array list 
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		listView = (ListView) findViewById(R.id.listview);
+		
+		arrayList = new ArrayList();
+        arrayList.add("Receive");
+        arrayList.add("Account");
+        arrayList.add("Post");
+        arrayList.add("Voice");
+        
+        arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_single_choice, arrayList);
+        listView.setAdapter(arrayAdapter);
+        
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			  
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				
+				final String item = (String) parent.getItemAtPosition(position);
+				Log.d("Events",item);
+				
+				startActivity(new Intent("com.example.canvas."+item+"Activity")); 
+				
+			}
+			
+		});
+		
 		//writeFileToInternalStorage("test");
 		//readFileFromInternalStorage("audio.m4a");
 		
         File[] list = getFilesDir().listFiles();
         
-        for (int i=0; i < list.length; i++)
-        {
-            Log.d("Events", "FileName:" + list[i].getName());
+        for (int i=0; i < list.length; i++){
+            //Log.d("Events", "FileName:" + list[i].getName());
         }
         
-		Button btn1 = (Button) findViewById(R.id.btn1);
-        btn1.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View arg0) {
-				
-				Intent i = new Intent("com.example.canvas.WeekActivity"); 
-				startActivity(i);
-				
-			}
-		});
-        
-        Button btn2 = (Button) findViewById(R.id.btn2);
-        btn2.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View arg0) {
-				
-				Intent i = new Intent("com.example.canvas.VoiceActivity"); 
-				startActivity(i);
-				
-			}
-		});
-        
-        Button btn3 = (Button) findViewById(R.id.btn3);
-        btn3.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View arg0) {
-				
-				Intent i = new Intent("com.example.canvas.PostActivity"); 
-				startActivity(i);
-				
-			}
-		});
-        
-        Button btn4 = (Button) findViewById(R.id.btn4);
-        btn4.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View arg0) {
-				
-				Intent i = new Intent("com.example.canvas.AccountActivity"); 
-				startActivity(i);
-				
-			}
-		});
+		
 		
 	}
 	

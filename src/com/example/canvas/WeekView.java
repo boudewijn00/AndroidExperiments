@@ -151,62 +151,6 @@ public class WeekView extends View {
 			   
 			}
 			
-			// 7 * 40 = 280 + (2 * 3 = 6) = 286
-			
-			//textPaint.setTypeface(customFont);
-			/*textPaint.setTextSize((int) (20 * scale));
-			textPaint.setColor(Color.WHITE);
-			
-			circlePaint.setColor(Color.WHITE);
-			circlePaint.setStrokeWidth(3);
-	        canvas.drawRect(0, 0, 277, 286, circlePaint);
-	        
-	        // Sunday
-	        circlePaint.setStrokeWidth(0);
-	        circlePaint.setColor(Color.argb(100, 123, 183, 233));
-	        canvas.drawRect(3, 243, 274, 283, circlePaint);
-	        canvas.drawText("SUN", 9, 270, textPaint);
-	        
-	        // Saturday
-	        circlePaint.setStrokeWidth(0);
-	        circlePaint.setColor(Color.argb(100, 171, 123, 233));
-	        canvas.drawRect(3, 203, 274, 243, circlePaint);
-	        canvas.drawText("SAT", 9, 230, textPaint);
-	        
-	        // Friday
-	        circlePaint.setStrokeWidth(0);
-	        circlePaint.setColor(Color.argb(100, 123, 183, 233));
-	        canvas.drawRect(3, 163, 274, 203, circlePaint);
-	        canvas.drawText("FRI", 9, 190, textPaint);
-	        
-	        // Thursday
-	        circlePaint.setStrokeWidth(0);
-	        circlePaint.setColor(Color.argb(100, 171, 123, 233));
-	        canvas.drawRect(3, 123, 274, 163, circlePaint);
-	        canvas.drawText("THU", 9, 150, textPaint);
-	        
-	        // Wednesday
-	        circlePaint.setStrokeWidth(0);
-	        circlePaint.setColor(Color.argb(100, 123, 183, 233));
-	        canvas.drawRect(3, 83, 274, 123, circlePaint);
-	        canvas.drawText("WED", 9, 110, textPaint);
-	        
-	        // Tuesday (second part)
-	        circlePaint.setStrokeWidth(0);
-	        circlePaint.setColor(Color.argb(100, 171, 123, 233));
-	        canvas.drawRect(100, 43, 274, 83, circlePaint);
-	        
-	        // Tuesday (first part)
-	        circlePaint.setStrokeWidth(0);
-	        circlePaint.setColor(Color.argb(100, 123, 183, 233));
-	        canvas.drawRect(3, 43, 100, 83, circlePaint);
-	        canvas.drawText("TUE", 9, 70, textPaint);
-	        
-	        // Monday
-	        circlePaint.setColor(Color.argb(100, 123, 183, 233));
-	        canvas.drawRect(3, 3, 274, 43, circlePaint);
-	        canvas.drawText("MON", 9, 30, textPaint);*/
-	        
 	        textPaint.setColor(Color.BLACK);
 	        canvas.drawText("WEEK 52 (24-12 - 01-01)", 0, 20, textPaint);
 			
