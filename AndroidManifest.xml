@@ -28,6 +28,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".ListViewActivity"
+                  android:label="ListViewActivity">
+            <intent-filter>
+                <action android:name="com.example.canvas.ListViewActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity android:name=".VoiceActivity"
                   android:label="VoiceActivity">
             <intent-filter>

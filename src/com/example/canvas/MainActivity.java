@@ -43,6 +43,7 @@ public class MainActivity extends Activity {
         arrayList.add("Account");
         arrayList.add("Post");
         arrayList.add("Voice");
+        arrayList.add("ListView");
         
         arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_single_choice, arrayList);
         listView.setAdapter(arrayAdapter);
