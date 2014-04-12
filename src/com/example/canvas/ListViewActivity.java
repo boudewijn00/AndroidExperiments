@@ -9,7 +9,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,6 +25,7 @@ import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.net.ParseException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -32,7 +36,9 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.example.canvas.JSONParser;
+import com.example.canvas.AccountToken;
 
 public class ListViewActivity extends Activity {
 
@@ -44,16 +50,14 @@ public class ListViewActivity extends Activity {
   	Activity activity;
   	
   	private JSONArray items;
+  	private JSONArray start;
+  	private JSONArray end;
+  	
   	protected AccountManager am;
   	
   	ArrayList<HashMap<String, String>> oslist = new ArrayList<HashMap<String, String>>();
 	  
-	  	//JSON Node Names
-	  	private static final String TAG_OS = "android";
-	  	private static final String TAG_VER = "ver";
-	  	private static final String TAG_NAME = "name";
-	  	private static final String TAG_API = "api";
-	  	private static final String TAG_AGE = "age";	
+	  	//JSON Node Names	
 	    
 	  	@Override
 	    protected void onCreate(Bundle savedInstanceState) {
@@ -108,7 +112,9 @@ public class ListViewActivity extends Activity {
 	    		
 	    		am = AccountManager.get(getApplicationContext());
 	    		
-	    		String authToken = updateToken(am,true);
+	    		AccountToken accountToken = new AccountToken();
+	    		
+	    		String authToken = accountToken.updateToken(am,true,activity);
 	    		
 	    		String beginDate = "2014-04-07T00:00:00+0200";
 	    		String endDate = "2014-04-13T00:00:00+0200";
@@ -118,45 +124,7 @@ public class ListViewActivity extends Activity {
 	    		return events;
 	        
 	    	}
-	    	
-	    	private String updateToken(AccountManager am, boolean invalidateToken) {
-				
-				String response = "";
-				String authToken = "null";
-				
-				String scopes = "oauth2: https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar";
-				
-				Account[] accounts = am.getAccountsByType("com.google");
-				AccountManagerFuture<Bundle> accountManagerFuture;
-				accountManagerFuture = am.getAuthToken(accounts[0], scopes, null, activity, null, null);
-					
-				String sAccountManagerFuture = String.valueOf(accountManagerFuture);
-					
-				Bundle authTokenBundle = null;
-				try {
-					authTokenBundle = accountManagerFuture.getResult();
-				} catch (OperationCanceledException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (AuthenticatorException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-					
-				authToken = authTokenBundle.getString(AccountManager.KEY_AUTHTOKEN).toString();
-				
-			    if(invalidateToken) {
-	                am.invalidateAuthToken("com.google", authToken);
-	                authToken = updateToken(am,false);
-	            }
-				
-				return authToken;
-				
-			}
-	    	
+	    		    	
 	    	private String getEvents(String authToken, String beginDate, String endDate){
 		    	
 		    	String response = "";
@@ -252,15 +220,24 @@ public class ListViewActivity extends Activity {
 	    				// Storing  JSON item in a Variable
 	    				
 	    				String summary = c.getString("summary");
-	    				//String name = c.getString(TAG_NAME);
-	    				//String age = c.getString(TAG_AGE);
+	    				
+	    				SimpleDateFormat dateInput = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZZ");
+	    				SimpleDateFormat dateOutput = new SimpleDateFormat("yyyy-MM-dd");
+	    				
+	    				JSONObject start = c.getJSONObject("start");
+	    				String startDateTime = start.getString("dateTime");
+	    				String startDate = dateOutput.format(dateInput.parse(startDateTime));
+	    				
+	    				JSONObject end = c.getJSONObject("end");
+	    				String endDateTime = start.getString("dateTime");
+	    				String endDate = dateOutput.format(dateInput.parse(endDateTime));
 	    				
 	    				// Adding value HashMap key => value
 	    				HashMap<String, String> map = new HashMap<String, String>();
-	    				//map.put(TAG_VER, ver);
-	    				map.put(TAG_NAME, summary);
-	    				//map.put(TAG_AGE, age);
-	    				//map.put("summary",summary);
+
+	    				map.put("summary", summary);
+						map.put("start", startDate);
+	    				map.put("end", endDate);
 	    				
 	    				oslist.add(map);
 	    				list=(ListView)findViewById(R.id.list);
@@ -269,15 +246,13 @@ public class ListViewActivity extends Activity {
 						R.layout.listitem_row,
 	                
 						new String[] { 
-	    						//TAG_VER,
-	    						TAG_NAME, 
-	    						//TAG_AGE
-	    						//summary
+	    						"summary", 
+	    						"start",
+	    						"end"
 	    						}, new int[] { 
-	    						//R.id.vers,
-	    						R.id.name, 
-	    						//R.id.age
-	    						//R.id.summary
+	    						R.id.summary, 
+	    						R.id.start,
+	    						R.id.end
 	    						});
 	            
 	    				list.setAdapter(adapter);
@@ -292,8 +267,10 @@ public class ListViewActivity extends Activity {
 	            }
 	        } catch (JSONException e) {
 	        	e.printStackTrace();
-	        }
-	       }
-	    }
+	        } catch (java.text.ParseException e) {
+				e.printStackTrace();
+			}
+       }
+    }
 	
 }
