@@ -42,6 +42,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".SensorsActivity"
+                  android:label="SensorsActivity">
+            <intent-filter>
+                <action android:name="com.example.canvas.SensorsActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity android:name=".PostActivity"
                   android:label="PostActivity">
             <intent-filter>

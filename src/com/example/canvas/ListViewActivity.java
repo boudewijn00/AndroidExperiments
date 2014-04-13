@@ -39,14 +39,11 @@ import android.widget.Toast;
 
 import com.example.canvas.JSONParser;
 import com.example.canvas.AccountToken;
+import com.example.canvas.CalendarEvents;
 
 public class ListViewActivity extends Activity {
 
 	ListView list;
-	TextView ver;
-	TextView name;
-	TextView api;
-  	Button Btngetdata;
   	Activity activity;
   	
   	private JSONArray items;
@@ -56,9 +53,7 @@ public class ListViewActivity extends Activity {
   	protected AccountManager am;
   	
   	ArrayList<HashMap<String, String>> oslist = new ArrayList<HashMap<String, String>>();
-	  
-	  	//JSON Node Names	
-	    
+	  	    
 	  	@Override
 	    protected void onCreate(Bundle savedInstanceState) {
 	  		
@@ -66,14 +61,8 @@ public class ListViewActivity extends Activity {
 	        setContentView(R.layout.activity_listview);
 	        
 	        oslist = new ArrayList<HashMap<String, String>>();
-	        Btngetdata = (Button)findViewById(R.id.getdata);
-	        Btngetdata.setOnClickListener(new View.OnClickListener() {
-	      
-	        	@Override
-	        	public void onClick(View view) {
-	        		new JSONParse().execute();
-	        	}
-	        });
+	        	      
+	        new JSONParse().execute();
 	        
 	    }
 	  	
@@ -85,10 +74,6 @@ public class ListViewActivity extends Activity {
 	        protected void onPreExecute() {
 	            
 	    		super.onPreExecute();
-	    		
-	    		//ver = (TextView)findViewById(R.id.vers);
-	    		name = (TextView)findViewById(R.id.name);
-	    		//api = (TextView)findViewById(R.id.api);
 	            
 	    		pDialog = new ProgressDialog(ListViewActivity.this);
 	            pDialog.setMessage("Getting Data ...");
@@ -100,16 +85,7 @@ public class ListViewActivity extends Activity {
 	    	
 	    	@Override
 	        protected String doInBackground(String... args) {
-	    		
-	    		//URL to get JSON Array
-	    	  	/*String url = "http://hellodata.nl/get.php";
-	    		
-	    		JSONParser jParser = new JSONParser();
-	        
-	    		// Getting JSON from URL
-	    		JSONObject json = jParser.getJSONFromUrl(url);
-	    		return json;*/
-	    		
+	    			    		
 	    		am = AccountManager.get(getApplicationContext());
 	    		
 	    		AccountToken accountToken = new AccountToken();
@@ -119,87 +95,15 @@ public class ListViewActivity extends Activity {
 	    		String beginDate = "2014-04-07T00:00:00+0200";
 	    		String endDate = "2014-04-13T00:00:00+0200";
 	    		
-	    		String events = getEvents(authToken,beginDate,endDate);
+	    		CalendarEvents calendarEvents = new CalendarEvents();
+	    		
+	    		String events = calendarEvents.getEvents(authToken,beginDate,endDate);
 	    		
 	    		return events;
 	        
 	    	}
 	    		    	
-	    	private String getEvents(String authToken, String beginDate, String endDate){
-		    	
-		    	String response = "";
-		    	String events = "";
-		    	String calendarId = "m7ltv01i3hl6lja9bh3ublkd64@group.calendar.google.com";
-		    	    	
-		    	URL uri = null;
-				try {
-					final String encodedBeginDate = URLEncoder.encode(beginDate, "UTF-8");
-					final String encodedEndDate = URLEncoder.encode(endDate, "UTF-8");
-					uri = new URL("https://www.googleapis.com/calendar/v3/calendars/"+calendarId+"/events?timeMax="+encodedEndDate+"&timeMin="+encodedBeginDate+"&orderBy=startTime&singleEvents=true");
-					//Log.d("Events",uri.toString());
-				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-			    HttpURLConnection con = null;
-				try {
-					con = (HttpURLConnection) uri.openConnection();
-					con.addRequestProperty("client_id", "1094621519767-lr864ii0dqi3ogqbvm3tstcptuu0hn9u.apps.googleusercontent.com");
-					con.setRequestProperty("Authorization", "OAuth " + authToken);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-			    int serverCode = 0;
-				try {
-					serverCode = con.getResponseCode();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				String sServerCode = String.valueOf(serverCode);
-				//Log.d("Events",sServerCode);
-				
-			    //successful query
-			    if (serverCode == 200) {
-			        InputStream is;
-					try {
-						
-						is = con.getInputStream();
-						//Log.d("Events","input stream available");
-						
-						BufferedReader r = new BufferedReader(new InputStreamReader(is));
-						StringBuilder total = new StringBuilder();
-						String line;
-						while ((line = r.readLine()) != null) {
-						    total.append(line);
-						}
-						
-						events = total.toString();
-						
-						//Log.d("Events",total.toString());
-						
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-			    //bad token, invalidate and get a new one
-			    } else if (serverCode == 401) {
-			        return response;
-			    //unknown error, do something else
-			    } else {
-			        return response;
-			    }
-		    	
-		    	return events;
-		    	
-		    }
+	    	
 	    	
 	    	protected void onPostExecute(String events) {
 	    		
