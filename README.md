@@ -2,7 +2,7 @@ it al started as an experiment to build a user friendly calendar for kids growin
 
 - account manager
 - retrieving data from google (calendar) API
-- JSON rendering
+- JSON parsing
 - custom fonts
 - sd storage
 - custom (list) views
