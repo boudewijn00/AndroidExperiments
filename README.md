@@ -10,3 +10,4 @@ it al started as an experiment to build a user friendly calendar for kids growin
 - sensors (accelerometer)
 - async http (get/ post)
 - voice record
+- motion event
