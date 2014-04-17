@@ -21,6 +21,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
+import com.example.canvas.views.WeekView;
+
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerFuture;
@@ -39,6 +41,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.canvas.models.AccountToken;
+import com.example.canvas.models.CalendarEvents;
 
 public class AccountActivity extends Activity {
 	
@@ -69,16 +74,17 @@ public class AccountActivity extends Activity {
 		@Override
 	    protected String doInBackground(String... url) {
 	      
-			String authToken = "null";
-			
 			String currentEvents = "";
 			String previousEvents = "";
 			String nextEvents = "";
 			
-			authToken = updateToken(am,true);
+			AccountToken accountToken = new AccountToken();
+    		String authToken = accountToken.updateToken(am,true,activity);
+
+    		CalendarEvents calendarEvents = new CalendarEvents();
 
 			// get the begin and end dates of this week
-			List weekBeginEndDates = getWeekBeginEndDates();
+			List weekBeginEndDates = calendarEvents.getWeekBeginEndDates();
 			
 			for (int i = 0; i < weekBeginEndDates.size(); i++) {
 				
@@ -91,7 +97,7 @@ public class AccountActivity extends Activity {
 				String endDate = current.get(1).toString();	
 				
 				// get the events from google calendar
-				String events = getEvents(authToken,beginDate,endDate);
+				String events = calendarEvents.getEvents(authToken,beginDate,endDate);
 				
 				if(i == 0){
 					currentEvents = events;
@@ -103,244 +109,10 @@ public class AccountActivity extends Activity {
 				
 			}
 			
-			getBlocks(currentEvents,previousEvents,nextEvents);
+			blocks = calendarEvents.getBlocks(currentEvents,previousEvents,nextEvents);
 			
 			return null;
 	      
-	    }
-		
-		private String updateToken(AccountManager am, boolean invalidateToken) {
-			
-			String response = "";
-			String authToken = "null";
-			
-			String scopes = "oauth2: https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar";
-			
-			Account[] accounts = am.getAccountsByType("com.google");
-			AccountManagerFuture<Bundle> accountManagerFuture;
-			accountManagerFuture = am.getAuthToken(accounts[0], scopes, null, activity, null, null);
-				
-			String sAccountManagerFuture = String.valueOf(accountManagerFuture);
-				
-			Bundle authTokenBundle = null;
-			try {
-				authTokenBundle = accountManagerFuture.getResult();
-			} catch (OperationCanceledException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (AuthenticatorException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-				
-			authToken = authTokenBundle.getString(AccountManager.KEY_AUTHTOKEN).toString();
-			
-		    if(invalidateToken) {
-                am.invalidateAuthToken("com.google", authToken);
-                authToken = updateToken(am,false);
-            }
-			
-			return authToken;
-			
-		}
-	    
-	    private String getEvents(String authToken, String beginDate, String endDate){
-	    	
-	    	String response = "";
-	    	String events = "";
-	    	String calendarId = "m7ltv01i3hl6lja9bh3ublkd64@group.calendar.google.com";
-	    	    	
-	    	URL uri = null;
-			try {
-				final String encodedBeginDate = URLEncoder.encode(beginDate, "UTF-8");
-				final String encodedEndDate = URLEncoder.encode(endDate, "UTF-8");
-				uri = new URL("https://www.googleapis.com/calendar/v3/calendars/"+calendarId+"/events?timeMax="+encodedEndDate+"&timeMin="+encodedBeginDate+"&orderBy=startTime&singleEvents=true");
-				//Log.d("Events",uri.toString());
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-		    HttpURLConnection con = null;
-			try {
-				con = (HttpURLConnection) uri.openConnection();
-				con.addRequestProperty("client_id", "1094621519767-lr864ii0dqi3ogqbvm3tstcptuu0hn9u.apps.googleusercontent.com");
-				con.setRequestProperty("Authorization", "OAuth " + authToken);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-		    int serverCode = 0;
-			try {
-				serverCode = con.getResponseCode();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			String sServerCode = String.valueOf(serverCode);
-			//Log.d("Events",sServerCode);
-			
-		    //successful query
-		    if (serverCode == 200) {
-		        InputStream is;
-				try {
-					
-					is = con.getInputStream();
-					//Log.d("Events","input stream available");
-					
-					BufferedReader r = new BufferedReader(new InputStreamReader(is));
-					StringBuilder total = new StringBuilder();
-					String line;
-					while ((line = r.readLine()) != null) {
-					    total.append(line);
-					}
-					
-					events = total.toString();
-					
-					//Log.d("Events",total.toString());
-					
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		    //bad token, invalidate and get a new one
-		    } else if (serverCode == 401) {
-		        return response;
-		    //unknown error, do something else
-		    } else {
-		        return response;
-		    }
-	    	
-	    	return events;
-	    	
-	    }
-	    
-	    /**
-	     * send the current, previous and next events to the new family sever, which makes blocks out of the events
-	     * @param currentEvents
-	     * @param previousEvents
-	     * @param nextEvents
-	     * @return
-	     */
-	    private Void getBlocks(String currentEvents, String previousEvents, String nextEvents){
-	    	
-	    	HttpClient httpclient = new DefaultHttpClient();
-	    	
-	    	// specify the URL you want to post to
-	    	HttpPost httppost = new HttpPost("http://thenewfamily.nl/calendar/days");
-	    	try {
-	    	
-	    		// create a list to store HTTP variables and their values
-		    	List nameValuePairs = new ArrayList();
-		    	
-		    	// add an HTTP variable and value pair
-		    	nameValuePairs.add(new BasicNameValuePair("current", currentEvents));
-		    	nameValuePairs.add(new BasicNameValuePair("previous", previousEvents));
-		    	nameValuePairs.add(new BasicNameValuePair("next", nextEvents));
-		    	
-		    	httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-		    	
-		    	// send the variable and value, in other words post, to the URL
-		    	HttpResponse response = httpclient.execute(httppost);
-		    	
-		    	InputStream content = response.getEntity().getContent();
-	
-				BufferedReader buffer = new BufferedReader(new InputStreamReader(content));
-				StringBuilder sb = new StringBuilder();
-				
-				String line = null;
-				
-				while ((line = buffer.readLine()) != null)
-			    {
-			        sb.append(line);
-			    }
-				
-				// grab the output, and put in a string
-				blocks = sb.toString();
-			
-	    	} catch (ClientProtocolException e) {
-	    	// process execption
-	    	} catch (IOException e) {
-	    	// process execption
-	    	}
-	    	
-			return null;
-	    	
-	    }
-	    
-	    private List getWeekBeginEndDates(){
-	    	
-	    	List weekBeginEndDates = new ArrayList();
-	    	
-	    	Calendar calendar = Calendar.getInstance();
-	    	int week = calendar.get(Calendar.WEEK_OF_YEAR);
-	    	
-	    	// get current begin end date
-	    	List currentBeginEndDates = getWeekBeginEndDate(week);
-	    	
-	    	List currentWeekDates = new ArrayList();
-	    	currentWeekDates.add(currentBeginEndDates.get(0).toString());
-	    	currentWeekDates.add(currentBeginEndDates.get(1).toString());
-	    	
-	    	// add current week dates to list
-	    	weekBeginEndDates.add(currentWeekDates);
-	    	
-	    	// get previous begin end date
-	    	List previousBeginEndDates = getWeekBeginEndDate(week-1);
-	    	
-	    	List previousWeekDates = new ArrayList();
-	    	previousWeekDates.add(previousBeginEndDates.get(0).toString());
-	    	previousWeekDates.add(previousBeginEndDates.get(1).toString());
-	    	
-	    	// add previous week dates to list
-	    	weekBeginEndDates.add(previousWeekDates);
-	    	
-	    	// get next begin end date
-	    	List nextBeginEndDates = getWeekBeginEndDate(week+1);
-	    	
-	    	List nextWeekDates = new ArrayList();
-	    	nextWeekDates.add(nextBeginEndDates.get(0).toString());
-	    	nextWeekDates.add(nextBeginEndDates.get(1).toString());
-	    	  
-	    	// add next week dates to list
-	    	weekBeginEndDates.add(nextWeekDates);
-	    	
-	    	return weekBeginEndDates; 
-	    	
-	    }
-	    
-	    private List getWeekBeginEndDate(int week){
-	    	
-	    	String sWeek = String.valueOf(week);
-	    	
-	    	int year = 2014;
-	    	List weekBeginEndDate = new ArrayList();
-	    	
-	    	Calendar calendar = Calendar.getInstance();
-	        calendar.clear();
-	        calendar.set(Calendar.WEEK_OF_YEAR, week);
-	        calendar.set(Calendar.YEAR, year);
-	    	
-	        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZZ");
-	        String beginDate = formatter.format(calendar.getTime());
-	        
-	        calendar.add(Calendar.DATE, 6);
-	        String endDate = formatter.format(calendar.getTime());
-	    	
-	    	weekBeginEndDate.add(beginDate);
-	    	weekBeginEndDate.add(endDate);
-	    	
-	    	return weekBeginEndDate;
-	    	
-	    	
 	    }
 	    
 	    @Override

@@ -1,14 +1,5 @@
 package com.example.canvas;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,14 +9,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerFuture;
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.net.ParseException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -37,9 +23,9 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.canvas.JSONParser;
-import com.example.canvas.AccountToken;
-import com.example.canvas.CalendarEvents;
+import com.example.canvas.models.AccountToken;
+import com.example.canvas.models.CalendarEvents;
+import com.example.canvas.models.JSONParser;
 
 public class ListViewActivity extends Activity {
 
@@ -89,14 +75,12 @@ public class ListViewActivity extends Activity {
 	    		am = AccountManager.get(getApplicationContext());
 	    		
 	    		AccountToken accountToken = new AccountToken();
-	    		
 	    		String authToken = accountToken.updateToken(am,true,activity);
 	    		
 	    		String beginDate = "2014-04-07T00:00:00+0200";
 	    		String endDate = "2014-04-13T00:00:00+0200";
 	    		
 	    		CalendarEvents calendarEvents = new CalendarEvents();
-	    		
 	    		String events = calendarEvents.getEvents(authToken,beginDate,endDate);
 	    		
 	    		return events;

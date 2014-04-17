@@ -65,7 +65,7 @@
             </intent-filter>
         </activity> 
        <activity
-            android:name=".AppInfo"
+            android:name="com.example.canvas.models.AppInfo"
             android:label="AppInfo" >
             <intent-filter>
                 <action android:name="com.example.canvas.AppInfo" />

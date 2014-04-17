@@ -1,4 +1,4 @@
-package com.example.canvas;
+package com.example.canvas.models;
 
 import java.io.BufferedReader;
 import java.io.IOException;

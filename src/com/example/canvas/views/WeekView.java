@@ -1,4 +1,4 @@
-package com.example.canvas;
+package com.example.canvas.views;
 
 import java.lang.reflect.Array;
 

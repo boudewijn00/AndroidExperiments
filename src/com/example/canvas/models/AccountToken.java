@@ -1,4 +1,4 @@
-package com.example.canvas;
+package com.example.canvas.models;
 
 import java.io.IOException;
 
@@ -12,7 +12,7 @@ import android.os.Bundle;
 
 public class AccountToken {
 
-	String updateToken(AccountManager am, boolean invalidateToken, Activity activity) {
+	public String updateToken(AccountManager am, boolean invalidateToken, Activity activity) {
 		
 		String response = "";
 		String authToken = "null";

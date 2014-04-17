@@ -32,8 +32,8 @@ import android.widget.TextView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.example.canvas.CustomView;
 import com.example.canvas.R;
+import com.example.canvas.views.CustomView;
 
 public class ReceiveActivity extends Activity {
 

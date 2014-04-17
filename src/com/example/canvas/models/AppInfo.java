@@ -1,8 +1,11 @@
-package com.example.canvas;
+package com.example.canvas.models;
 
 import java.io.*;
 
 import org.apache.http.impl.client.DefaultHttpClient;
+
+import com.example.canvas.R;
+import com.example.canvas.R.layout;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
